@@ -1,3 +1,16 @@
-<%= turbo_frame_tag dom_id(response), class: "px-2 rounded-lg inline-block #{response.ai? ? 'self-start bg-blue-900' : 'bg-black self-end'}" do %>  
-  <p class=" text-white px-2 py-2 rounded"> <%= response.content  %> </p>
+<%= turbo_frame_tag dom_id(response), 
+    class: "max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed transition-all animate-in fade-in slide-in-from-bottom-2 duration-300
+    #{response.ai? ? 
+      'self-start bg-zinc-900 border border-zinc-800 text-zinc-400 rounded-tl-none' : 
+      'self-end bg-zinc-800 text-zinc-100 rounded-tr-none shadow-lg shadow-black/20'}" do %>
+  
+  <div class="flex flex-col gap-1">
+    <span class="text-[9px] font-mono uppercase tracking-[0.2em] opacity-40 mb-1">
+      <%= response.ai? ? "Ollama // Response" : "User // Input" %>
+    </span>
+
+    <div class="font-sans">
+      <%= response.content %>
+    </div>
+  </div>
 <% end %>

@@ -2,6 +2,7 @@
     before_action :set_conversation, only: [ :show, :ask ]
     def show
       @responses = @conversation.responses
+      @conversations = Conversation.all.order(created_at: :desc)
     end
     def index
     end
