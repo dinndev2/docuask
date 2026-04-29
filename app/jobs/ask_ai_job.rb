@@ -3,7 +3,6 @@ class AskAiJob < ApplicationJob
 
   def perform(question, conversation_id, selected_model)
     answer = Chat.new(question, conversation_id, selected_model).call
-    # Clear thinking state and create AI response
     clear_thinking_state(conversation_id)
     Response.create!(content: answer, sender: :ai, conversation_id: conversation_id)
     rescue OpenAI::Errors::APIConnectionError => e

@@ -5,26 +5,81 @@ include Ollama
 class EmbeddingExtractor
   CHUNK_SIZE = 1000
   OVERLAP = 200
-  def initialize(document, model = "openai")
+  def initialize(document, model = "openai", conversation_id)
     @document = document
     @model = model
+    @conversation = Conversation.find(conversation_id)
     @ollama = Ollama::Client.new(base_url: "http://localhost:11434")
     @openai = openai = OpenAI::Client.new(api_key: ENV["OPENAI_API_KEY"])
   end
 
   def call
     extract_text
+    question_generator
   end
 
   private
+
   def chunk_creation(text)
     vector = embed(text)
+    chunk_generator(vector, text)
+  end
+
+  def chunk_generator(vector, text)
+    clean_text = text.to_s.delete("\u0000")
+
     ActiveRecord::Base.transaction do
       @document.chunks.create!(
-        content: text,
+        content: clean_text,
         embedding: vector
       )
     end
+  end
+
+  def question_generator
+    result = generate_document_sample_questions
+
+    questions = result["questions"]
+
+    return if questions.blank?
+
+    ActiveRecord::Base.transaction do
+      questions.each do |q|
+        @conversation.sample_questions.create!(content: q)
+      end
+    end
+  end
+
+  def generate_document_sample_questions
+    first_5_chunks = @document.chunks
+                               .limit(5)
+                               .pluck(:content)
+                               .join("\n\n")
+
+    response = @openai.responses.create(
+      model: "gpt-4o-mini",
+      input: [
+        {
+          role: "system",
+          content: "You return ONLY valid JSON. No explanation, no markdown."
+        },
+        {
+          role: "user",
+          content: <<~TEXT
+            Generate 3 sample questions based only on this document:
+
+            #{first_5_chunks}
+
+            Format:
+            {
+              "questions": ["...", "..."]
+            }
+          TEXT
+        }
+      ]
+    )
+
+    JSON.parse(response.output_text)
   end
 
   def extract_text
@@ -57,7 +112,7 @@ class EmbeddingExtractor
     end
   end
 
-  def self.get_embed(q, model)
+  def self.get_embed(q, model = "openai")
     @ollama = Ollama::Client.new(base_url: "http://localhost:11434")
     @openai = openai = OpenAI::Client.new(api_key: ENV["OPENAI_API_KEY"])
     if model == "ollama"

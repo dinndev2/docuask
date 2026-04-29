@@ -41,7 +41,6 @@ class Chat
   end
 
   def response_by_model(prompt)
-    # return local_response if Rails.env.development?
     if @selected_model == "openai"
       response = @openai.responses.create(
         model: "gpt-4o-mini",

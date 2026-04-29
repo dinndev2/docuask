@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_27_004314) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_29_050502) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -76,9 +76,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_27_004314) do
     t.index ["conversation_id"], name: "index_responses_on_conversation_id"
   end
 
+  create_table "sample_questions", force: :cascade do |t|
+    t.string "content"
+    t.bigint "conversation_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conversation_id"], name: "index_sample_questions_on_conversation_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "chunks", "documents"
   add_foreign_key "documents", "conversations"
   add_foreign_key "responses", "conversations"
+  add_foreign_key "sample_questions", "conversations"
 end
