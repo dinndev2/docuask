@@ -29,6 +29,13 @@ class Chat
       - If the context doesn't contain the answer, say "I couldn't find that in the documents."
       - Do not repeat the context verbatim; summarize and explain it.
 
+      Format your responses using Markdown:
+      - Use **bold** for emphasis
+      - Use bullet points when appropriate
+      - Use links like [text](url)
+      - Use code blocks when needed
+
+      Do NOT return plain text only.
       [CONTEXT]
       #{context}
 

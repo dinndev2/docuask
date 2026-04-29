@@ -335,6 +335,7 @@ GEM
       tsort
     readline (0.0.4)
       reline
+    redcarpet (3.6.1)
     regexp_parser (2.12.0)
     reline (0.6.3)
       io-console (~> 0.5)
@@ -487,6 +488,7 @@ DEPENDENCIES
   pry
   puma (>= 5.0)
   rails (~> 8.0.4)
+  redcarpet
   rubocop-rails-omakase
   selenium-webdriver
   solid_cable
