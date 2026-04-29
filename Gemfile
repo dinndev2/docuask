@@ -68,5 +68,6 @@ gem "httparty"
 gem "ollama-ruby"
 gem "neighbor"
 gem "pdf-reader"
-
+gem "openai", "~> 0.60.0"
 gem "tailwindcss-rails", "~> 4.4"
+gem "dotenv-rails", groups: [ :development, :test ]

@@ -4,7 +4,7 @@ class Conversation < ApplicationRecord
   validate :documents_must_be_valid
   has_many :responses
 
-
+  AI_MODELS = %w[openai ollama]
   private
   def documents_must_be_valid
     documents.each do |doc|

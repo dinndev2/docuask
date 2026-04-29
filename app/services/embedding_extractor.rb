@@ -5,9 +5,11 @@ include Ollama
 class EmbeddingExtractor
   CHUNK_SIZE = 1000
   OVERLAP = 200
-  def initialize(document)
+  def initialize(document, model = "openai")
     @document = document
+    @model = model
     @ollama = Ollama::Client.new(base_url: "http://localhost:11434")
+    @openai = openai = OpenAI::Client.new(api_key: ENV["OPENAI_API_KEY"])
   end
 
   def call
@@ -44,11 +46,28 @@ class EmbeddingExtractor
   end
 
   def embed(text)
-    @ollama.embed(model: "nomic-embed-text", input: text)["embeddings"].first
+    if @model == "ollama"
+      @ollama.embed(model: "nomic-embed-text", input: text)["embeddings"].first
+    else
+      @openai.embeddings.create(
+        model: "text-embedding-3-small",
+        input: text,
+        dimensions: 768
+      ).data[0].embedding
+    end
   end
 
-  def self.get_embed(q)
+  def self.get_embed(q, model)
     @ollama = Ollama::Client.new(base_url: "http://localhost:11434")
-    @ollama.embed(model: "nomic-embed-text", input: q)["embeddings"].first
+    @openai = openai = OpenAI::Client.new(api_key: ENV["OPENAI_API_KEY"])
+    if model == "ollama"
+      @ollama.embed(model: "nomic-embed-text", input: q)["embeddings"].first
+    else
+      @openai.embeddings.create(
+        model: "text-embedding-3-small",
+        input: q,
+        dimensions: 768
+      ).data[0].embedding
+    end
   end
 end

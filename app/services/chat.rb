@@ -1,13 +1,17 @@
 require "open-uri"
 require "ollama"
+require "bundler/setup"
+require "openai"
 include Ollama
 
 class Chat
-  def initialize(q, conversation_id)
+  def initialize(q, conversation_id, selected_model = "openai")
+    Excon.defaults[:read_timeout] = 1000
     @query = q
-    @query_embeddings = EmbeddingExtractor.get_embed(q)
+    @query_embeddings = EmbeddingExtractor.get_embed(q, selected_model)
     @conversation_id = conversation_id
-    Excon.defaults[:read_timeout] = 400
+    @selected_model = selected_model
+    @openai = openai = OpenAI::Client.new(api_key: ENV["OPENAI_API_KEY"])
     @ollama = Ollama::Client.new(base_url: "http://localhost:11434")
   end
 
@@ -33,15 +37,29 @@ class Chat
 
       [ASSISTANT ANSWER]
     PROMPT
+    response_by_model(prompt)
+  end
 
-    # Pro-tip: Qwen 3.5 is great, but ensure your temperature is around 0.7 for "natural" feeling answers.
-    response = @ollama.generate(
+  def response_by_model(prompt)
+    # return local_response if Rails.env.development?
+    if @selected_model == "openai"
+      response = @openai.responses.create(
+        model: "gpt-4o-mini",
+        input: prompt
+      )
+      response.output_text
+    elsif @selected_model == "ollama"
+      local_response(prompt)["response"]
+    end
+  end
+
+  def local_response(prompt)
+    @ollama.generate(
       model: "qwen3.5:9b",
       prompt: prompt,
       stream: false,
       options: { temperature: 0.7 }
     )
-    response["response"]
   end
 
   def context

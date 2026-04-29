@@ -31,30 +31,48 @@
           <%= render @responses %>
         </div>
 
-        <div id="thinking-container" class="mt-8 min-h-[40px]">
-          <%= turbo_stream_from "thinking_stream_container" %>
-        </div> 
+        <div id="thinking_stream_container"> 
+            <%= turbo_stream_from "thinking_stream_container" %>
+            <div id="thinking-container" class="">
+            </div> 
+          </div>
+        </div>
 
         <div class="h-32"></div>
       </div>
-    </div>
+      <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
+        <div class="max-w-3xl mx-auto relative group">
+          <%= form_with url: ask_conversation_path(@conversation), 
+                        class: "flex flex-col gap-2", 
+                        data: { controller: "chat", action: "turbo:submit-end->chat#reset" } do |f| %>
+            
+            <div class="flex justify-between items-center px-1">
+              <div class="flex items-center gap-3">
+                <span class="text-[8px] font-mono text-zinc-700 uppercase tracking-widest">Active_Model:</span>
+                <%= f.select :model_name, 
+                    Conversation::AI_MODELS.map { |m| [m.titleize, m] }, 
+                    {}, 
+                    { class: "bg-transparent text-[9px] font-mono text-zinc-500 border-none p-0 focus:ring-0 cursor-pointer hover:text-zinc-300 transition-colors uppercase tracking-tighter" } 
+                %>
+              </div>
+              <span class="text-[8px] font-mono text-zinc-800 uppercase tracking-widest">Encrypted_Link</span>
+            </div>
 
-    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
-      <div class="max-w-3xl mx-auto relative group">
-        <%= form_with url: ask_conversation_path(@conversation), 
-                      class: "relative", 
-                      data: { controller: "chat", action: "turbo:submit-end->chat#reset" } do |f| %>
-          
-          <%= f.text_field :query,
-              placeholder: "EXECUTE QUERY...", 
-              class: "w-full bg-zinc-900 border border-zinc-800 rounded-xl py-4 pl-5 pr-14 text-sm font-mono focus:outline-none focus:border-zinc-500 transition-all placeholder:text-zinc-700 text-zinc-200" %>
-          
-          <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-zinc-600 hover:text-zinc-100 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
-        <% end %>
+            <div class="relative">
+              <%= f.text_field :query,
+                  placeholder: "EXECUTE QUERY...", 
+                  class: "w-full bg-transparent border-b border-zinc-900 focus:border-zinc-700 py-4 px-1 text-xs font-mono focus:outline-none transition-all duration-700 placeholder:text-zinc-800 text-zinc-300" %>
+              
+              <button type="submit" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-zinc-700 hover:text-zinc-400 transition-all duration-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-900 to-transparent opacity-50"></div>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>

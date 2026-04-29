@@ -9,8 +9,9 @@
 
     def ask
       question = params[:query]
+      selected_model = params[:model_name]
       question_record = Response.create!(content: question, sender: :guest, conversation: @conversation)
-      AskOllamaJob.perform_later(question, @conversation.id)
+      AskAiJob.perform_later(question, @conversation.id, selected_model)
 
       respond_to do |f|
         f.json { render json: { message: "Asking" }, status: :accepted }
