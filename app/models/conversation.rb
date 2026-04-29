@@ -2,8 +2,8 @@ class Conversation < ApplicationRecord
   has_many :documents, dependent: :destroy
   accepts_nested_attributes_for :documents
   validate :documents_must_be_valid
-  has_many :responses
-  has_many :sample_questions
+  has_many :responses, dependent: :destroy
+  has_many :sample_questions, dependent: :destroy
 
   AI_MODELS = %w[openai]
 

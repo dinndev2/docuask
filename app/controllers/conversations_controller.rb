@@ -9,7 +9,7 @@
 
     def ask
       question = params[:query]
-      selected_model = params[:model_name]
+      selected_model = "openai"
       question_record = Response.create!(content: question, sender: :guest, conversation: @conversation)
       AskAiJob.perform_later(question, @conversation.id, selected_model)
 
