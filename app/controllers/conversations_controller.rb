@@ -3,7 +3,9 @@
     def show
       @responses = @conversation.responses
       @conversations = Conversation.all.order(created_at: :desc)
-      @questions = @conversation.questions
+      count = @conversation.sample_questions.count
+      offset = rand(count)
+      @sample_questions = @conversation.sample_questions.offset(offset).limit(3)
     end
     def index
     end

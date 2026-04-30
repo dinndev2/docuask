@@ -66,7 +66,7 @@ class EmbeddingExtractor
         {
           role: "user",
           content: <<~TEXT
-            Generate 3 sample questions based only on this document:
+            Generate strictly 3 sample questions based only on this document:
 
             #{first_5_chunks}
 
@@ -128,12 +128,12 @@ class EmbeddingExtractor
 
   private
   def fill_question_container
-    Turbo::StreamsChannel.broadcast_update_to(
-      "questions_container",
+    @conversation.broadcast_replace_to(
+      @conversation,
       target: "questions",
       partial: "sample_questions/sample_question",
       collection: @conversation.sample_questions,
-      locals: { conversation: conversation }
+      locals: { conversation: @conversation }
     )
   end
 end

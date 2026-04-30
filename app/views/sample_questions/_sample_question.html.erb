@@ -1,10 +1,9 @@
 <div class="flex items-center gap-4 shrink-0">
   <%= button_to ask_conversation_path(conversation), 
       method: :post, 
-      params: { query: question.content },
+      params: { query: sample_question.content },
       class: "text-[12px] text-zinc-600 hover:text-zinc-200 transition-colors bg-transparent border-none p-0 cursor-pointer italic font-light tracking-tight" do %>
-    "<%= question.content %>"
+    "<%= sample_question.content %>"
   <% end %>
-  <% if i < 2 %><span class="h-2 w-[1px] bg-zinc-900"></span><% end %>
 </div>
 

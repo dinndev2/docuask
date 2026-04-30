@@ -38,13 +38,24 @@
     </div>
 
     <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-zinc-950 from-80% via-zinc-950/100 to-transparent">
-      <div class="max-w-3xl mx-auto flex flex-col gap-6"> 
-        <%= turbo_stream_from "questions_container" do %>
-          <span class="text-[8px] font-mono text-blue-500 font-bold uppercase tracking-[0.2em] shrink-0">Suggestions:</span>
+      <div class="max-w-3xl mx-auto flex flex-col gap-4"> 
+
+          <span class="text-[8px] font-mono text-blue-500 font-bold uppercase tracking-[0.2em] shrink-0">
+            Suggestions:
+          </span>
+        
           <div class="flex gap-2 items-center flex-wrap" id="questions">
-            <%= render @questions, locals: {conversation: conversation}%>
+            <% if @sample_questions.blank? %>
+              <span class="text-[8px] font-mono text-yellow-500 font-bold uppercase tracking-[0.2em] shrink-0">
+                Generating Sample Questions...
+              </span>
+            <% end %>
+            <%= render partial: "sample_questions/sample_question",
+                       collection: @sample_questions,
+                       locals: { conversation: @conversation } %>
           </div>
-        <% end %>
+          <%= turbo_stream_from @conversation %>
+
 
         <%= form_with url: ask_conversation_path(@conversation), 
                       class: "flex flex-col gap-2", 
