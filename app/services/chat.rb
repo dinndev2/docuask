@@ -26,7 +26,7 @@ class Chat
       [INSTRUCTIONS]
       You are a professional assistant for Din. Use the PROVIDED CONTEXT below to answer the user's QUERY.#{' '}
       - Be concise and direct.
-      - If the context doesn't contain the answer, say "I couldn't find that in the documents."
+      - If the context doesn't contain the answer, say "I couldn't find that in the documents. please reffer to the sample questions below."
       - Do not repeat the context verbatim; summarize and explain it.
 
       Format your responses using Markdown:

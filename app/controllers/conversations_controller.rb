@@ -3,12 +3,14 @@
     def show
       @responses = @conversation.responses
       @conversations = Conversation.all.order(created_at: :desc)
+      @questions = @conversation.questions
     end
     def index
     end
 
     def ask
       question = params[:query]
+      return if question.empty?
       selected_model = "openai"
       question_record = Response.create!(content: question, sender: :guest, conversation: @conversation)
       AskAiJob.perform_later(question, @conversation.id, selected_model)

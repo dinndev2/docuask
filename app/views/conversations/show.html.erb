@@ -1,7 +1,7 @@
 <div class="w-full h-screen flex bg-zinc-950 text-zinc-300 font-sans overflow-hidden">
   <%= render partial: "shared/navigation" %>
 
-  <div class="flex-1 flex flex-col relative h-full">  
+  <div data-controller="chat" class="flex-1 flex flex-col relative h-full">  
     <header class="h-16 border-b border-zinc-800/50 flex justify-between items-center px-8 shrink-0">
       <div class="flex items-center gap-3">
         <span class="text-[10px] font-mono text-zinc-500">SESSION:</span>
@@ -15,7 +15,7 @@
       </div>
     </header>
 
-    <div id="chat-messages" class="flex-1 overflow-y-auto p-6 md:p-12 scroll-smooth">
+    <div class="flex-1 overflow-y-auto p-6 md:p-12 scroll-smooth" data-chat-target="responses" >
       <div class="max-w-3xl mx-auto w-full space-y-10">
         <div class="flex gap-4 mb-16 opacity-60">
           <div class="text-[10px] font-mono text-zinc-500 shrink-0 mt-1">[SYS]</div>
@@ -37,29 +37,18 @@
         <div class="h-48"></div> </div>
     </div>
 
-    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-zinc-950 from-90% via-zinc-950/100 to-transparent">
-      <div class="max-w-3xl mx-auto flex flex-col gap-6">
-        
-        <% if @conversation.sample_questions.any? %>
-          <div class="flex gap-4 items-center flex-wrap">
-            <span class="text-[8px] font-mono text-zinc-800 uppercase tracking-[0.2em] shrink-0">Suggestions:</span>
-            <% @conversation.sample_questions.limit(3).each_with_index do |q, i| %>
-              <div class="flex items-center gap-4 shrink-0">
-                <%= button_to ask_conversation_path(@conversation), 
-                    method: :post, 
-                    params: { query: q.content },
-                    class: "text-[12px] text-zinc-600 hover:text-zinc-200 transition-colors bg-transparent border-none p-0 cursor-pointer italic font-light tracking-tight" do %>
-                  "<%= q.content %>"
-                <% end %>
-                <% if i < 2 %><span class="h-2 w-[1px] bg-zinc-900"></span><% end %>
-              </div>
-            <% end %> 
+    <div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-zinc-950 from-80% via-zinc-950/100 to-transparent">
+      <div class="max-w-3xl mx-auto flex flex-col gap-6"> 
+        <%= turbo_stream_from "questions_container" do %>
+          <span class="text-[8px] font-mono text-blue-500 font-bold uppercase tracking-[0.2em] shrink-0">Suggestions:</span>
+          <div class="flex gap-2 items-center flex-wrap" id="questions">
+            <%= render @questions, locals: {conversation: conversation}%>
           </div>
         <% end %>
 
         <%= form_with url: ask_conversation_path(@conversation), 
                       class: "flex flex-col gap-2", 
-                      data: { controller: "chat", action: "turbo:submit-end->chat#reset" } do |f| %>
+                      data: { action: "turbo:submit-end->chat#reset" } do |f| %>
           
           <div class="flex justify-between items-center px-1">
             <div class="flex items-center gap-3">

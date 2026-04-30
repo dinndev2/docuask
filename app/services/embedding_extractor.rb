@@ -5,7 +5,7 @@ include Ollama
 class EmbeddingExtractor
   CHUNK_SIZE = 1000
   OVERLAP = 200
-  def initialize(document, model = "openai", conversation_id)
+  def initialize(document:, model: "openai", conversation_id:)
     @document = document
     @model = model
     @conversation = Conversation.find(conversation_id)
@@ -14,7 +14,9 @@ class EmbeddingExtractor
   end
 
   def call
+    # 1 generate chunks
     extract_text
+    # 2 generate questions out of chunks generated above
     question_generator
   end
 
@@ -22,18 +24,15 @@ class EmbeddingExtractor
 
   def chunk_creation(text)
     vector = embed(text)
-    chunk_generator(vector, text)
+    chunk_record_generator(vector, text)
   end
 
-  def chunk_generator(vector, text)
+  def chunk_record_generator(vector, text)
     clean_text = text.to_s.delete("\u0000")
-
-    ActiveRecord::Base.transaction do
-      @document.chunks.create!(
-        content: clean_text,
-        embedding: vector
-      )
-    end
+    @document.chunks.create!(
+      content: clean_text,
+      embedding: vector
+    )
   end
 
   def question_generator
@@ -48,6 +47,7 @@ class EmbeddingExtractor
         @conversation.sample_questions.create!(content: q)
       end
     end
+    fill_question_container
   end
 
   def generate_document_sample_questions
@@ -124,5 +124,16 @@ class EmbeddingExtractor
         dimensions: 768
       ).data[0].embedding
     end
+  end
+
+  private
+  def fill_question_container
+    Turbo::StreamsChannel.broadcast_update_to(
+      "questions_container",
+      target: "questions",
+      partial: "sample_questions/sample_question",
+      collection: @conversation.sample_questions,
+      locals: { conversation: conversation }
+    )
   end
 end

@@ -16,6 +16,6 @@ class Document < ApplicationRecord
   end
 
   def generate_embeddings
-    EmbeddingExtractor.new(self, "openai", conversation.id).call()
+    ExternalAiJob.perform_later(document, "openai", conversation.id)
   end
 end
