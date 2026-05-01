@@ -2,12 +2,18 @@ class AskAiJob < ApplicationJob
   queue_as :default
 
   def perform(question, conversation_id, selected_model)
-    answer = Chat.new(question, conversation_id, selected_model).call
+    initChat = Chat.new(question, conversation_id, selected_model)
+    answer = initChat.call
+    sources = initChat.context[:sources]
     clear_thinking_state(conversation_id)
-    Response.create!(content: answer, sender: :ai, conversation_id: conversation_id)
+    ActiveRecord::Base.transaction do
+      response = Response.create!(content: answer, sender: :ai, conversation_id: conversation_id)
+      sources.each do |source|
+        ResponseResource.create!(response: response, chunk_id: source[:chunk_id], score: source[:score], rank: source[:rank], content: source[:content])
+      end
+    end
     rescue OpenAI::Errors::APIConnectionError => e
         handle_error(conversation_id, "The server could not be reached", e)
-
     rescue OpenAI::Errors::RateLimitError => e
       handle_error(conversation_id, "Rate limit hit. Backing off a bit.", e)
 

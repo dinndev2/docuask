@@ -22,16 +22,19 @@ class EmbeddingExtractor
 
   private
 
-  def chunk_creation(text)
+  def chunk_creation(text, start_bit, end_bit, page_count)
     vector = embed(text)
-    chunk_record_generator(vector, text)
+    chunk_record_generator(vector, text, start_bit, end_bit, page_count)
   end
 
-  def chunk_record_generator(vector, text)
+  def chunk_record_generator(vector, text, start_bit, end_bit, page_count)
     clean_text = text.to_s.delete("\u0000")
     @document.chunks.create!(
       content: clean_text,
-      embedding: vector
+      embedding: vector,
+      start_char: start_bit,
+      end_char: end_bit,
+      page: page_count
     )
   end
 
@@ -85,14 +88,17 @@ class EmbeddingExtractor
   def extract_text
     @document.context_file.open do |file|
       reader = PDF::Reader.new(file.path)
-      text = reader.pages.map(&:text).join("\n").scrub
-      start_bit = 0
-      while start_bit < text.length
-        end_bit = start_bit + CHUNK_SIZE
-        chunk_text = text[start_bit...end_bit]
-        next if chunk_text.blank?
-        chunk_creation(chunk_text)
-        start_bit += (CHUNK_SIZE - OVERLAP)
+      reader.pages.each_with_index do |page, page_index|
+        page_number = page_index + 1
+        text = page.text.scrub
+        start_bit = 0
+        while start_bit < text.length
+          end_bit = start_bit + CHUNK_SIZE
+          chunk_text = text[start_bit...end_bit]
+          break if chunk_text.blank?
+          chunk_creation(chunk_text, start_bit, end_bit, page_number)
+          start_bit += (CHUNK_SIZE - OVERLAP)
+        end
       end
     end
   rescue PDF::Reader::MalformedPDFError => e

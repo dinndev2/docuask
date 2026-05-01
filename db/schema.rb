@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_29_050502) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_01_081237) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "vector"
@@ -49,6 +49,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_29_050502) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "content"
+    t.integer "start_char"
+    t.integer "end_char"
+    t.integer "page"
     t.index ["document_id"], name: "index_chunks_on_document_id"
   end
 
@@ -65,6 +68,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_29_050502) do
     t.string "title"
     t.bigint "conversation_id"
     t.index ["conversation_id"], name: "index_documents_on_conversation_id"
+  end
+
+  create_table "response_resources", force: :cascade do |t|
+    t.float "score"
+    t.integer "rank"
+    t.bigint "chunk_id", null: false
+    t.bigint "response_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "content"
+    t.index ["chunk_id"], name: "index_response_resources_on_chunk_id"
+    t.index ["response_id"], name: "index_response_resources_on_response_id"
   end
 
   create_table "responses", force: :cascade do |t|
@@ -88,6 +103,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_29_050502) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "chunks", "documents"
   add_foreign_key "documents", "conversations"
+  add_foreign_key "response_resources", "chunks"
+  add_foreign_key "response_resources", "responses"
   add_foreign_key "responses", "conversations"
   add_foreign_key "sample_questions", "conversations"
 end

@@ -37,8 +37,7 @@ class Chat
 
       Do NOT return plain text only.
       [CONTEXT]
-      #{context}
-
+      #{context[:text]}
       [USER QUERY]
       #{@query}
 
@@ -70,6 +69,20 @@ class Chat
 
   def context
     related_chunks = Chunk.joins(:document).where(documents: { conversation_id: @conversation_id }).nearest_neighbors(:embedding, @query_embeddings, distance: "cosine").limit(5)
-    related_chunks.map(&:content).join("\n\n---\n\n")
+
+    sources = related_chunks.map.with_index do |chunk, index|
+      distance = chunk.neighbor_distance
+      raise "Can't find distance for #{chunk.id}" if distance.nil?
+      {
+        chunk_id: chunk.id,
+        content: chunk.content,
+        score: (1 - distance).round(4),
+        rank: index + 1
+      }
+    end
+
+    text = related_chunks.map(&:content).join("\n\n---\n\n")
+    # get the chunk information and score
+    { text: text, sources: sources }
   end
 end
