@@ -246,7 +246,7 @@ GEM
       term-ansicolor (~> 1.11)
       terminal-table (>= 3.0)
       tins (~> 1)
-    openai (0.60.0)
+    openai (0.67.0)
       base64
       cgi
       connection_pool
@@ -480,7 +480,7 @@ DEPENDENCIES
   kamal
   neighbor
   ollama-ruby
-  openai (~> 0.60.0)
+  openai (~> 0.67.0)
   pdf-reader
   pg (~> 1.1)
   pgvector
